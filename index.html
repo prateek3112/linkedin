@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedIn AI Post Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .hero {
+            text-align: center;
+            color: #1a1a1a;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .hero h1 {
+            font-size: 2.5em;
+            margin-bottom: 12px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .hero p {
+            font-size: 1.1em;
+            color: #666;
+            font-weight: 400;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 48px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            animation: fadeInUp 0.8s ease-out;
+            border: 1px solid #e8e8e0;
+        }
+
+        .config-section {
+            margin-bottom: 32px;
+        }
+
+        .config-section h2 {
+            color: #1a1a1a;
+            margin-bottom: 24px;
+            font-size: 1.3em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #4a4a4a;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid #d4d4c8;
+            border-radius: 8px;
+            font-size: 0.95em;
+            transition: all 0.2s;
+            background: #fafaf8;
+            color: #1a1a1a;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #1a1a1a;
+            background: #ffffff;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #1a1a1a;
+        }
+
+        .btn {
+            background: #1a1a1a;
+            color: #ffffff;
+            border: none;
+            padding: 16px 32px;
+            font-size: 1em;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s;
+            letter-spacing: 0.3px;
+        }
+
+        .btn:hover {
+            background: #000000;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background: #d4d4c8;
+            cursor: not-allowed;
+            transform: none;
+            color: #8a8a80;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+
+        .spinner {
+            border: 3px solid #e8e8e0;
+            border-top: 3px solid #1a1a1a;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        .loading p {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .result-section {
+            display: none;
+            margin-top: 32px;
+            padding: 32px;
+            background: #fafaf8;
+            border-radius: 12px;
+            animation: fadeIn 0.5s ease-out;
+            border: 1.5px solid #e8e8e0;
+        }
+
+        .result-section h2 {
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .post-preview {
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 10px;
+            border-left: 3px solid #1a1a1a;
+            margin-bottom: 24px;
+            white-space: pre-wrap;
+            line-height: 1.7;
+            color: #1a1a1a;
+            font-size: 0.95em;
+        }
+
+        .approval-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn-approve {
+            background: #1a1a1a;
+            flex: 1;
+        }
+
+        .btn-approve:hover {
+            background: #000000;
+        }
+
+        .btn-reject {
+            background: #ffffff;
+            color: #1a1a1a;
+            border: 1.5px solid #1a1a1a;
+            flex: 1;
+        }
+
+        .btn-reject:hover {
+            background: #f5f5f0;
+        }
+
+        .success-message {
+            background: #f0f5f0;
+            color: #2d5f2d;
+            padding: 24px;
+            border-radius: 10px;
+            border: 1.5px solid #b8d4b8;
+            text-align: center;
+            display: none;
+        }
+
+        .success-message h3 {
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .error-message {
+            background: #faf0f0;
+            color: #5f2d2d;
+            padding: 24px;
+            border-radius: 10px;
+            border: 1.5px solid #d4b8b8;
+            text-align: center;
+            display: none;
+        }
+
+        .error-message h3 {
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .info-box {
+            background: #fafaf8;
+            border-left: 3px solid #1a1a1a;
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-size: 0.9em;
+            color: #4a4a4a;
+            line-height: 1.6;
+        }
+
+        .info-box strong {
+            color: #1a1a1a;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2em;
+            }
+            .hero p {
+                font-size: 1.1em;
+            }
+            .card {
+                padding: 25px;
+            }
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero">
+            <h1>🚀 LinkedIn AI Post Generator</h1>
+            <p>Generate engaging LinkedIn posts about AI news with one click</p>
+        </div>
+
+        <div class="card">
+            <div class="info-box">
+                ℹ️ This demo fetches the latest AI news and generates a LinkedIn post for your approval before posting.
+            </div>
+
+            <div class="info-box" style="background: #fff3cd; border-left-color: #ffc107; color: #856404;">
+                ⚠️ <strong>Important Setup Steps:</strong><br>
+                1️⃣ Import the updated workflow JSON (has CORS headers)<br>
+                2️⃣ Make sure workflow is <strong>ACTIVATED</strong> (toggle switch ON)<br>
+                3️⃣ If on Render free tier, first request may take 30-60s (instance waking up)<br>
+                4️⃣ Open browser console (F12) to see detailed logs<br>
+                5️⃣ Test: Visit your webhook URL in browser - you should see "POST request" error (that's good!)
+            </div>
+
+            <div class="config-section">
+                <h2>⚙️ Configuration</h2>
+                
+                <div class="form-group">
+                    <label for="topic">Topic/Keywords</label>
+                    <input type="text" id="topic" placeholder="e.g., artificial intelligence, machine learning" 
+                           value="(artificial intelligence OR AI OR machine learning OR automation) AND technology">
+                </div>
+
+                <div class="grid">
+                    <div class="form-group">
+                        <label for="articleCount">Number of Articles</label>
+                        <input type="number" id="articleCount" min="1" max="10" value="5">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="language">Language</label>
+                        <select id="language">
+                            <option value="en">English</option>
+                            <option value="es">Spanish</option>
+                            <option value="fr">French</option>
+                            <option value="de">German</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid">
+                    <div class="form-group">
+                        <label for="tone">Post Tone</label>
+                        <select id="tone">
+                            <option value="professional">Professional</option>
+                            <option value="conversational">Conversational</option>
+                            <option value="thought-leader">Thought Leader</option>
+                            <option value="exciting">Exciting</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="hashtagCount">Number of Hashtags</label>
+                        <input type="number" id="hashtagCount" min="1" max="10" value="6">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="includeEmojis" checked>
+                        <label for="includeEmojis" style="margin-bottom: 0;">Include Emojis</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="webhookUrl">n8n Webhook URL</label>
+                    <input type="text" id="webhookUrl" placeholder="https://your-n8n-instance.com/webhook/trigger-linkedin-post">
+                </div>
+            </div>
+
+            <button class="btn" id="generateBtn" onclick="generatePost()">
+                Generate LinkedIn Post
+            </button>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Fetching news and generating your post...</p>
+            </div>
+
+            <div class="result-section" id="resultSection">
+                <h2>📝 Generated Post Preview</h2>
+                <div class="post-preview" id="postPreview"></div>
+                
+                <div class="approval-buttons">
+                    <button class="btn btn-approve" onclick="approvePost()">
+                        ✓ Approve & Post to LinkedIn
+                    </button>
+                    <button class="btn btn-reject" onclick="rejectPost()">
+                        ✗ Reject & Generate New
+                    </button>
+                </div>
+            </div>
+
+            <div class="success-message" id="successMessage">
+                <h3>✓ Success!</h3>
+                <p>Your post has been published to LinkedIn!</p>
+            </div>
+
+            <div class="error-message" id="errorMessage">
+                <h3>✗ Error</h3>
+                <p id="errorText"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let approvalUrl = '';
+        let generatedPost = '';
+
+        // Load saved webhook URL from localStorage
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedUrl = localStorage.getItem('n8nWebhookUrl');
+            if (savedUrl) {
+                document.getElementById('webhookUrl').value = savedUrl;
+            }
+        });
+
+        async function generatePost() {
+            const webhookUrl = document.getElementById('webhookUrl').value.trim();
+            
+            if (!webhookUrl) {
+                showError('Please enter your n8n webhook URL');
+                return;
+            }
+
+            // Validate URL format
+            try {
+                new URL(webhookUrl);
+            } catch (e) {
+                showError('Please enter a valid URL (e.g., https://your-domain.com/webhook/trigger-linkedin-post)');
+                return;
+            }
+
+            // Save webhook URL
+            localStorage.setItem('n8nWebhookUrl', webhookUrl);
+
+            const config = {
+                topic: document.getElementById('topic').value,
+                articleCount: parseInt(document.getElementById('articleCount').value),
+                language: document.getElementById('language').value,
+                tone: document.getElementById('tone').value,
+                hashtagCount: parseInt(document.getElementById('hashtagCount').value),
+                includeEmojis: document.getElementById('includeEmojis').checked
+            };
+
+            // Show loading
+            document.getElementById('generateBtn').disabled = true;
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('resultSection').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+
+            console.log('🚀 Sending POST request to:', webhookUrl);
+            console.log('📦 Payload:', JSON.stringify(config, null, 2));
+
+            try {
+                // Use XMLHttpRequest as fallback for CSP issues
+                const data = await new Promise((resolve, reject) => {
+                    const xhr = new XMLHttpRequest();
+                    
+                    xhr.open('POST', webhookUrl, true);
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+                    xhr.setRequestHeader('Accept', 'application/json');
+                    
+                    xhr.onload = function() {
+                        console.log('📡 Response status:', xhr.status);
+                        console.log('📄 Raw response:', xhr.responseText);
+                        
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            try {
+                                const data = JSON.parse(xhr.responseText);
+                                resolve(data);
+                            } catch (e) {
+                                reject(new Error('Invalid JSON response: ' + xhr.responseText));
+                            }
+                        } else {
+                            reject(new Error(`Server returned ${xhr.status}: ${xhr.responseText}`));
+                        }
+                    };
+                    
+                    xhr.onerror = function() {
+                        reject(new Error('Network error - Cannot connect to n8n. This could be:\n' +
+                                       '• CORS not enabled in n8n\n' +
+                                       '• n8n instance sleeping (Render free tier)\n' +
+                                       '• Network/firewall issue'));
+                    };
+                    
+                    xhr.ontimeout = function() {
+                        reject(new Error('Request timeout - n8n took too long to respond (possibly waking up)'));
+                    };
+                    
+                    xhr.timeout = 90000; // 90 second timeout for Render wake-up
+                    
+                    xhr.send(JSON.stringify(config));
+                });
+
+                console.log('✅ Parsed response:', data);
+                
+                if (!data.generatedPost) {
+                    throw new Error('Response missing "generatedPost" field. Check your n8n workflow "Return Generated Post" node.');
+                }
+
+                if (!data.approvalUrl) {
+                    throw new Error('Response missing "approvalUrl" field. Check your n8n workflow "Wait for Approval" node configuration.');
+                }
+
+                generatedPost = data.generatedPost;
+                approvalUrl = data.approvalUrl;
+
+                console.log('✅ Post generated successfully!');
+                console.log('📝 Generated post:', generatedPost);
+                console.log('🔗 Approval URL:', approvalUrl);
+
+                // Show result
+                document.getElementById('postPreview').textContent = generatedPost;
+                document.getElementById('resultSection').style.display = 'block';
+                
+            } catch (error) {
+                console.error('❌ Full error:', error);
+                
+                if (error.message.includes('Network error') || error.message.includes('CORS')) {
+                    showError('❌ Connection Failed!\n\n' +
+                             '🔧 You MUST update your n8n workflow:\n\n' +
+                             '1️⃣ Re-import the updated workflow JSON\n' +
+                             '2️⃣ The Webhook Trigger node now has CORS headers\n' +
+                             '3️⃣ Make sure workflow is ACTIVATED\n' +
+                             '4️⃣ Try again (first time may take 60s on Render)\n\n' +
+                             'Technical: ' + error.message);
+                } else {
+                    showError('❌ Error: ' + error.message + '\n\n💡 Check browser console (F12) for details');
+                }
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('generateBtn').disabled = false;
+            }
+        }
+
+        async function approvePost() {
+            if (!approvalUrl) {
+                showError('No approval URL available');
+                return;
+            }
+
+            const approveBtn = event.target;
+            const rejectBtn = document.querySelector('.btn-reject');
+            approveBtn.disabled = true;
+            rejectBtn.disabled = true;
+            approveBtn.textContent = '⏳ Posting to LinkedIn...';
+
+            console.log('Approving post with URL:', approvalUrl);
+
+            try {
+                const data = await new Promise((resolve, reject) => {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', approvalUrl, true);
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+                    xhr.setRequestHeader('Accept', 'application/json');
+                    
+                    xhr.onload = function() {
+                        console.log('Approval response status:', xhr.status);
+                        console.log('Approval response:', xhr.responseText);
+                        
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            try {
+                                resolve(JSON.parse(xhr.responseText));
+                            } catch (e) {
+                                reject(new Error('Invalid response'));
+                            }
+                        } else {
+                            reject(new Error(`Status ${xhr.status}: ${xhr.responseText}`));
+                        }
+                    };
+                    
+                    xhr.onerror = () => reject(new Error('Network error'));
+                    xhr.timeout = 30000;
+                    xhr.ontimeout = () => reject(new Error('Timeout'));
+                    
+                    xhr.send(JSON.stringify({ approved: true }));
+                });
+
+                if (data.success) {
+                    document.getElementById('resultSection').style.display = 'none';
+                    document.getElementById('successMessage').style.display = 'block';
+                } else {
+                    showError(data.message || 'Failed to post');
+                    approveBtn.disabled = false;
+                    rejectBtn.disabled = false;
+                    approveBtn.textContent = '✓ Approve & Post to LinkedIn';
+                }
+            } catch (error) {
+                console.error('Approval error:', error);
+                showError('Failed to approve: ' + error.message);
+                approveBtn.disabled = false;
+                rejectBtn.disabled = false;
+                approveBtn.textContent = '✓ Approve & Post to LinkedIn';
+            }
+        }
+
+        async function rejectPost() {
+            if (!approvalUrl) {
+                showError('No approval URL available');
+                return;
+            }
+
+            console.log('Rejecting post with URL:', approvalUrl);
+
+            try {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', approvalUrl, true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.setRequestHeader('Accept', 'application/json');
+                
+                xhr.onload = function() {
+                    console.log('Rejection response:', xhr.responseText);
+                    try {
+                        const data = JSON.parse(xhr.responseText);
+                        document.getElementById('resultSection').style.display = 'none';
+                        showInfo(data.message || 'Post rejected. Click generate to create a new one.');
+                    } catch (e) {
+                        showInfo('Post rejected. Click generate to create a new one.');
+                    }
+                };
+                
+                xhr.onerror = function() {
+                    console.error('Rejection error');
+                    showError('Failed to reject post');
+                };
+                
+                xhr.send(JSON.stringify({ approved: false }));
+            } catch (error) {
+                console.error('Rejection error:', error);
+                showError('Failed to reject: ' + error.message);
+            }
+        }
+
+        function showError(message) {
+            document.getElementById('errorText').textContent = message;
+            document.getElementById('errorMessage').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('errorMessage').style.display = 'none';
+            }, 10000); // Show for 10 seconds
+        }
+
+        function showInfo(message) {
+            const infoDiv = document.createElement('div');
+            infoDiv.style.cssText = 'background: #cce5ff; color: #004085; padding: 20px; border-radius: 10px; margin-top: 20px; text-align: center;';
+            infoDiv.textContent = message;
+            document.querySelector('.card').appendChild(infoDiv);
+            setTimeout(() => infoDiv.remove(), 5000);
+        }
+    </script>
+</body>
+</html>
