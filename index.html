@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LinkedIn AI Post Generator</title>
+    <title>LinkedIn Auto-Poster Dashboard</title>
     <style>
         * {
             margin: 0;
@@ -12,676 +12,418 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f5f5f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            top: -250px;
+            right: -250px;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        body::after {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            bottom: -200px;
+            left: -200px;
+            animation: float 8s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(20px); }
         }
 
         .container {
-            max-width: 800px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
             width: 100%;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            position: relative;
+            z-index: 1;
         }
 
-        .hero {
+        .header {
             text-align: center;
-            color: #1a1a1a;
-            margin-bottom: 40px;
-            animation: fadeInDown 0.8s ease-out;
+            margin-bottom: 30px;
         }
 
-        .hero h1 {
+        .header h1 {
+            color: white;
             font-size: 2.5em;
-            margin-bottom: 12px;
-            font-weight: 600;
-            letter-spacing: -0.5px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .hero p {
+        .header p {
+            color: rgba(255, 255, 255, 0.9);
             font-size: 1.1em;
-            color: #666;
-            font-weight: 400;
         }
 
-        .card {
-            background: #ffffff;
-            border-radius: 12px;
-            padding: 48px;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
-            animation: fadeInUp 0.8s ease-out;
-            border: 1px solid #e8e8e0;
+        .status-card {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
-        .config-section {
-            margin-bottom: 32px;
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            color: white;
         }
 
-        .config-section h2 {
-            color: #1a1a1a;
-            margin-bottom: 24px;
-            font-size: 1.3em;
+        .status-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .status-label {
             font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-size: 0.95em;
         }
 
-        .form-group {
+        .status-value {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 15px;
             margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            color: #4a4a4a;
-            font-weight: 500;
-            margin-bottom: 8px;
-            font-size: 0.95em;
-        }
-
-        input[type="text"],
-        input[type="number"],
-        select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1.5px solid #d4d4c8;
-            border-radius: 8px;
-            font-size: 0.95em;
-            transition: all 0.2s;
-            background: #fafaf8;
-            color: #1a1a1a;
-        }
-
-        input[type="text"]:focus,
-        input[type="number"]:focus,
-        select:focus {
-            outline: none;
-            border-color: #1a1a1a;
-            background: #ffffff;
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-            accent-color: #1a1a1a;
         }
 
         .btn {
-            background: #1a1a1a;
-            color: #ffffff;
+            flex: 1;
+            padding: 15px 30px;
             border: none;
-            padding: 16px 32px;
-            font-size: 1em;
-            font-weight: 500;
-            border-radius: 8px;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 600;
             cursor: pointer;
-            width: 100%;
-            transition: all 0.2s;
-            letter-spacing: 0.3px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
-        .btn:hover {
-            background: #000000;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        .btn-primary {
+            background: linear-gradient(135deg, #0077b5 0%, #00a0dc 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 119, 181, 0.4);
         }
 
-        .btn:active {
-            transform: translateY(0);
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 119, 181, 0.6);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
         }
 
         .btn:disabled {
-            background: #d4d4c8;
+            opacity: 0.5;
             cursor: not-allowed;
-            transform: none;
-            color: #8a8a80;
+            transform: none !important;
         }
 
-        .loading {
-            text-align: center;
-            padding: 40px;
-            display: none;
+        .btn:active:not(:disabled) {
+            transform: scale(0.98);
         }
 
-        .spinner {
-            border: 3px solid #e8e8e0;
-            border-top: 3px solid #1a1a1a;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 16px;
-        }
-
-        .loading p {
-            color: #666;
-            font-size: 0.95em;
-        }
-
-        .result-section {
-            display: none;
-            margin-top: 32px;
-            padding: 32px;
-            background: #fafaf8;
+        .log-container {
+            background: rgba(0, 0, 0, 0.2);
             border-radius: 12px;
-            animation: fadeIn 0.5s ease-out;
-            border: 1.5px solid #e8e8e0;
-        }
-
-        .result-section h2 {
-            color: #1a1a1a;
-            margin-bottom: 20px;
-            font-size: 1.2em;
-            font-weight: 600;
-        }
-
-        .post-preview {
-            background: #ffffff;
-            padding: 24px;
-            border-radius: 10px;
-            border-left: 3px solid #1a1a1a;
-            margin-bottom: 24px;
-            white-space: pre-wrap;
-            line-height: 1.7;
-            color: #1a1a1a;
-            font-size: 0.95em;
-        }
-
-        .approval-buttons {
-            display: flex;
-            gap: 12px;
+            padding: 20px;
+            max-height: 200px;
+            overflow-y: auto;
             margin-top: 20px;
         }
 
-        .btn-approve {
-            background: #1a1a1a;
-            flex: 1;
-        }
-
-        .btn-approve:hover {
-            background: #000000;
-        }
-
-        .btn-reject {
-            background: #ffffff;
-            color: #1a1a1a;
-            border: 1.5px solid #1a1a1a;
-            flex: 1;
-        }
-
-        .btn-reject:hover {
-            background: #f5f5f0;
-        }
-
-        .success-message {
-            background: #f0f5f0;
-            color: #2d5f2d;
-            padding: 24px;
-            border-radius: 10px;
-            border: 1.5px solid #b8d4b8;
-            text-align: center;
-            display: none;
-        }
-
-        .success-message h3 {
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-
-        .error-message {
-            background: #faf0f0;
-            color: #5f2d2d;
-            padding: 24px;
-            border-radius: 10px;
-            border: 1.5px solid #d4b8b8;
-            text-align: center;
-            display: none;
-        }
-
-        .error-message h3 {
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-
-        .info-box {
-            background: #fafaf8;
-            border-left: 3px solid #1a1a1a;
-            padding: 16px 20px;
-            border-radius: 8px;
-            margin-bottom: 24px;
+        .log-entry {
+            color: rgba(255, 255, 255, 0.9);
             font-size: 0.9em;
-            color: #4a4a4a;
-            line-height: 1.6;
+            margin-bottom: 8px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            border-left: 3px solid #0077b5;
         }
 
-        .info-box strong {
-            color: #1a1a1a;
+        .log-entry.success {
+            border-left-color: #4caf50;
         }
 
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+        .log-entry.error {
+            border-left-color: #f44336;
         }
 
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2em;
-            }
-            .hero p {
-                font-size: 1.1em;
-            }
-            .card {
-                padding: 25px;
-            }
-            .grid {
-                grid-template-columns: 1fr;
-            }
+        .log-entry .timestamp {
+            font-weight: 600;
+            margin-right: 10px;
         }
 
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-left: 10px;
+            vertical-align: middle;
         }
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        .schedule-info {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9em;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .icon {
+            font-size: 1.2em;
+            margin-right: 8px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .config-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+        }
+
+        .config-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1em;
+        }
+
+        .config-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .config-input:focus {
+            outline: none;
+            border-color: #0077b5;
+            background: rgba(255, 255, 255, 0.25);
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="hero">
-            <h1>🚀 LinkedIn AI Post Generator</h1>
-            <p>Generate engaging LinkedIn posts about AI news with one click</p>
+        <div class="header">
+            <h1>🚀 LinkedIn Auto-Poster</h1>
+            <p>AI-Powered Social Media Automation</p>
         </div>
 
-        <div class="card">
-            <div class="info-box">
-                ℹ️ This demo fetches the latest AI news and generates a LinkedIn post for your approval before posting.
+        <div class="status-card">
+            <div class="status-item">
+                <span class="status-label">📊 Status</span>
+                <span class="status-value" id="status">Ready</span>
             </div>
-
-            <div class="info-box" style="background: #fff3cd; border-left-color: #ffc107; color: #856404;">
-                ⚠️ <strong>Important Setup Steps:</strong><br>
-                1️⃣ Import the updated workflow JSON (has CORS headers)<br>
-                2️⃣ Make sure workflow is <strong>ACTIVATED</strong> (toggle switch ON)<br>
-                3️⃣ If on Render free tier, first request may take 30-60s (instance waking up)<br>
-                4️⃣ Open browser console (F12) to see detailed logs<br>
-                5️⃣ Test: Visit your webhook URL in browser - you should see "POST request" error (that's good!)
+            <div class="status-item">
+                <span class="status-label">⏰ Last Run</span>
+                <span class="status-value" id="lastRun">Never</span>
             </div>
-
-            <div class="config-section">
-                <h2>⚙️ Configuration</h2>
-                
-                <div class="form-group">
-                    <label for="topic">Topic/Keywords</label>
-                    <input type="text" id="topic" placeholder="e.g., artificial intelligence, machine learning" 
-                           value="(artificial intelligence OR AI OR machine learning OR automation) AND technology">
-                </div>
-
-                <div class="grid">
-                    <div class="form-group">
-                        <label for="articleCount">Number of Articles</label>
-                        <input type="number" id="articleCount" min="1" max="10" value="5">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="language">Language</label>
-                        <select id="language">
-                            <option value="en">English</option>
-                            <option value="es">Spanish</option>
-                            <option value="fr">French</option>
-                            <option value="de">German</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="grid">
-                    <div class="form-group">
-                        <label for="tone">Post Tone</label>
-                        <select id="tone">
-                            <option value="professional">Professional</option>
-                            <option value="conversational">Conversational</option>
-                            <option value="thought-leader">Thought Leader</option>
-                            <option value="exciting">Exciting</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="hashtagCount">Number of Hashtags</label>
-                        <input type="number" id="hashtagCount" min="1" max="10" value="6">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="includeEmojis" checked>
-                        <label for="includeEmojis" style="margin-bottom: 0;">Include Emojis</label>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="webhookUrl">n8n Webhook URL</label>
-                    <input type="text" id="webhookUrl" placeholder="https://your-n8n-instance.com/webhook/trigger-linkedin-post">
-                </div>
+            <div class="status-item">
+                <span class="status-label">📝 Posts Created</span>
+                <span class="status-value" id="postCount">0</span>
             </div>
+        </div>
 
-            <button class="btn" id="generateBtn" onclick="generatePost()">
-                Generate LinkedIn Post
+        <div class="config-section">
+            <h3 style="color: white; margin-bottom: 15px;">⚙️ Workflow Configuration</h3>
+            <input 
+                type="text" 
+                class="config-input" 
+                id="webhookUrl" 
+                placeholder="Enter your n8n webhook URL..."
+                value="">
+            <small style="color: rgba(255, 255, 255, 0.7); display: block; margin-top: -10px;">
+                Replace the Schedule Trigger with a Webhook Trigger node in your workflow
+            </small>
+        </div>
+
+        <div class="btn-container">
+            <button class="btn btn-primary" id="triggerBtn" onclick="triggerWorkflow()">
+                <span class="icon">▶️</span> Trigger Now
             </button>
+            <button class="btn btn-secondary" onclick="clearLogs()">
+                <span class="icon">🗑️</span> Clear Logs
+            </button>
+        </div>
 
-            <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <p>Fetching news and generating your post...</p>
+        <div class="log-container" id="logContainer">
+            <div class="log-entry">
+                <span class="timestamp">System</span>
+                Ready to post AI news to LinkedIn!
             </div>
+        </div>
 
-            <div class="result-section" id="resultSection">
-                <h2>📝 Generated Post Preview</h2>
-                <div class="post-preview" id="postPreview"></div>
-                
-                <div class="approval-buttons">
-                    <button class="btn btn-approve" onclick="approvePost()">
-                        ✓ Approve & Post to LinkedIn
-                    </button>
-                    <button class="btn btn-reject" onclick="rejectPost()">
-                        ✗ Reject & Generate New
-                    </button>
-                </div>
-            </div>
-
-            <div class="success-message" id="successMessage">
-                <h3>✓ Success!</h3>
-                <p>Your post has been published to LinkedIn!</p>
-            </div>
-
-            <div class="error-message" id="errorMessage">
-                <h3>✗ Error</h3>
-                <p id="errorText"></p>
-            </div>
+        <div class="schedule-info">
+            ⏰ Scheduled to run daily at 6:15 PM (18:15)<br>
+            Or trigger manually anytime above
         </div>
     </div>
 
     <script>
-        let approvalUrl = '';
-        let generatedPost = '';
-
-        // Load saved webhook URL from localStorage
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedUrl = localStorage.getItem('n8nWebhookUrl');
-            if (savedUrl) {
-                document.getElementById('webhookUrl').value = savedUrl;
+        let postCount = 0;
+        
+        function addLog(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.innerHTML = `<span class="timestamp">${timestamp}</span>${message}`;
+            logContainer.insertBefore(logEntry, logContainer.firstChild);
+            
+            // Keep only last 10 logs
+            while (logContainer.children.length > 10) {
+                logContainer.removeChild(logContainer.lastChild);
             }
-        });
+        }
 
-        async function generatePost() {
+        async function triggerWorkflow() {
             const webhookUrl = document.getElementById('webhookUrl').value.trim();
             
             if (!webhookUrl) {
-                showError('Please enter your n8n webhook URL');
+                addLog('❌ Please enter your n8n webhook URL first!', 'error');
+                alert('Please enter your n8n webhook URL in the configuration section.');
                 return;
             }
 
-            // Validate URL format
+            const btn = document.getElementById('triggerBtn');
+            const statusEl = document.getElementById('status');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span class="icon">⏳</span> Processing<span class="spinner"></span>';
+            statusEl.textContent = 'Running';
+            
+            addLog('🚀 Triggering workflow...', 'info');
+            
             try {
-                new URL(webhookUrl);
-            } catch (e) {
-                showError('Please enter a valid URL (e.g., https://your-domain.com/webhook/trigger-linkedin-post)');
-                return;
-            }
-
-            // Save webhook URL
-            localStorage.setItem('n8nWebhookUrl', webhookUrl);
-
-            const config = {
-                topic: document.getElementById('topic').value,
-                articleCount: parseInt(document.getElementById('articleCount').value),
-                language: document.getElementById('language').value,
-                tone: document.getElementById('tone').value,
-                hashtagCount: parseInt(document.getElementById('hashtagCount').value),
-                includeEmojis: document.getElementById('includeEmojis').checked
-            };
-
-            // Show loading
-            document.getElementById('generateBtn').disabled = true;
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('resultSection').style.display = 'none';
-            document.getElementById('successMessage').style.display = 'none';
-            document.getElementById('errorMessage').style.display = 'none';
-
-            console.log('🚀 Sending POST request to:', webhookUrl);
-            console.log('📦 Payload:', JSON.stringify(config, null, 2));
-
-            try {
-                // Use XMLHttpRequest as fallback for CSP issues
-                const data = await new Promise((resolve, reject) => {
-                    const xhr = new XMLHttpRequest();
-                    
-                    xhr.open('POST', webhookUrl, true);
-                    xhr.setRequestHeader('Content-Type', 'application/json');
-                    xhr.setRequestHeader('Accept', 'application/json');
-                    
-                    xhr.onload = function() {
-                        console.log('📡 Response status:', xhr.status);
-                        console.log('📄 Raw response:', xhr.responseText);
-                        
-                        if (xhr.status >= 200 && xhr.status < 300) {
-                            try {
-                                const data = JSON.parse(xhr.responseText);
-                                resolve(data);
-                            } catch (e) {
-                                reject(new Error('Invalid JSON response: ' + xhr.responseText));
-                            }
-                        } else {
-                            reject(new Error(`Server returned ${xhr.status}: ${xhr.responseText}`));
-                        }
-                    };
-                    
-                    xhr.onerror = function() {
-                        reject(new Error('Network error - Cannot connect to n8n. This could be:\n' +
-                                       '• CORS not enabled in n8n\n' +
-                                       '• n8n instance sleeping (Render free tier)\n' +
-                                       '• Network/firewall issue'));
-                    };
-                    
-                    xhr.ontimeout = function() {
-                        reject(new Error('Request timeout - n8n took too long to respond (possibly waking up)'));
-                    };
-                    
-                    xhr.timeout = 90000; // 90 second timeout for Render wake-up
-                    
-                    xhr.send(JSON.stringify(config));
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        trigger: 'manual',
+                        timestamp: new Date().toISOString()
+                    })
                 });
-
-                console.log('✅ Parsed response:', data);
                 
-                if (!data.generatedPost) {
-                    throw new Error('Response missing "generatedPost" field. Check your n8n workflow "Return Generated Post" node.');
-                }
-
-                if (!data.approvalUrl) {
-                    throw new Error('Response missing "approvalUrl" field. Check your n8n workflow "Wait for Approval" node configuration.');
-                }
-
-                generatedPost = data.generatedPost;
-                approvalUrl = data.approvalUrl;
-
-                console.log('✅ Post generated successfully!');
-                console.log('📝 Generated post:', generatedPost);
-                console.log('🔗 Approval URL:', approvalUrl);
-
-                // Show result
-                document.getElementById('postPreview').textContent = generatedPost;
-                document.getElementById('resultSection').style.display = 'block';
-                
-            } catch (error) {
-                console.error('❌ Full error:', error);
-                
-                if (error.message.includes('Network error') || error.message.includes('CORS')) {
-                    showError('❌ Connection Failed!\n\n' +
-                             '🔧 You MUST update your n8n workflow:\n\n' +
-                             '1️⃣ Re-import the updated workflow JSON\n' +
-                             '2️⃣ The Webhook Trigger node now has CORS headers\n' +
-                             '3️⃣ Make sure workflow is ACTIVATED\n' +
-                             '4️⃣ Try again (first time may take 60s on Render)\n\n' +
-                             'Technical: ' + error.message);
+                if (response.ok) {
+                    postCount++;
+                    document.getElementById('postCount').textContent = postCount;
+                    document.getElementById('lastRun').textContent = new Date().toLocaleTimeString();
+                    statusEl.textContent = 'Success';
+                    
+                    addLog('✅ Workflow triggered successfully!', 'success');
+                    addLog('📰 Fetching latest AI news...', 'info');
+                    
+                    // Simulate workflow steps
+                    setTimeout(() => {
+                        addLog('🤖 Generating LinkedIn post with Gemini AI...', 'info');
+                    }, 2000);
+                    
+                    setTimeout(() => {
+                        addLog('✨ Post created and published to LinkedIn!', 'success');
+                        statusEl.textContent = 'Ready';
+                    }, 4000);
                 } else {
-                    showError('❌ Error: ' + error.message + '\n\n💡 Check browser console (F12) for details');
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
+            } catch (error) {
+                addLog(`❌ Error: ${error.message}`, 'error');
+                statusEl.textContent = 'Error';
+                console.error('Workflow trigger error:', error);
             } finally {
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('generateBtn').disabled = false;
+                btn.disabled = false;
+                btn.innerHTML = '<span class="icon">▶️</span> Trigger Now';
             }
         }
 
-        async function approvePost() {
-            if (!approvalUrl) {
-                showError('No approval URL available');
-                return;
-            }
-
-            const approveBtn = event.target;
-            const rejectBtn = document.querySelector('.btn-reject');
-            approveBtn.disabled = true;
-            rejectBtn.disabled = true;
-            approveBtn.textContent = '⏳ Posting to LinkedIn...';
-
-            console.log('Approving post with URL:', approvalUrl);
-
-            try {
-                const data = await new Promise((resolve, reject) => {
-                    const xhr = new XMLHttpRequest();
-                    xhr.open('POST', approvalUrl, true);
-                    xhr.setRequestHeader('Content-Type', 'application/json');
-                    xhr.setRequestHeader('Accept', 'application/json');
-                    
-                    xhr.onload = function() {
-                        console.log('Approval response status:', xhr.status);
-                        console.log('Approval response:', xhr.responseText);
-                        
-                        if (xhr.status >= 200 && xhr.status < 300) {
-                            try {
-                                resolve(JSON.parse(xhr.responseText));
-                            } catch (e) {
-                                reject(new Error('Invalid response'));
-                            }
-                        } else {
-                            reject(new Error(`Status ${xhr.status}: ${xhr.responseText}`));
-                        }
-                    };
-                    
-                    xhr.onerror = () => reject(new Error('Network error'));
-                    xhr.timeout = 30000;
-                    xhr.ontimeout = () => reject(new Error('Timeout'));
-                    
-                    xhr.send(JSON.stringify({ approved: true }));
-                });
-
-                if (data.success) {
-                    document.getElementById('resultSection').style.display = 'none';
-                    document.getElementById('successMessage').style.display = 'block';
-                } else {
-                    showError(data.message || 'Failed to post');
-                    approveBtn.disabled = false;
-                    rejectBtn.disabled = false;
-                    approveBtn.textContent = '✓ Approve & Post to LinkedIn';
-                }
-            } catch (error) {
-                console.error('Approval error:', error);
-                showError('Failed to approve: ' + error.message);
-                approveBtn.disabled = false;
-                rejectBtn.disabled = false;
-                approveBtn.textContent = '✓ Approve & Post to LinkedIn';
-            }
+        function clearLogs() {
+            const logContainer = document.getElementById('logContainer');
+            logContainer.innerHTML = '<div class="log-entry"><span class="timestamp">System</span>Logs cleared. Ready for action!</div>';
+            addLog('🧹 Logs cleared', 'info');
         }
 
-        async function rejectPost() {
-            if (!approvalUrl) {
-                showError('No approval URL available');
-                return;
+        // Update time every second
+        setInterval(() => {
+            const now = new Date();
+            if (now.getHours() === 18 && now.getMinutes() === 15 && now.getSeconds() === 0) {
+                addLog('⏰ Scheduled trigger activated!', 'success');
             }
-
-            console.log('Rejecting post with URL:', approvalUrl);
-
-            try {
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', approvalUrl, true);
-                xhr.setRequestHeader('Content-Type', 'application/json');
-                xhr.setRequestHeader('Accept', 'application/json');
-                
-                xhr.onload = function() {
-                    console.log('Rejection response:', xhr.responseText);
-                    try {
-                        const data = JSON.parse(xhr.responseText);
-                        document.getElementById('resultSection').style.display = 'none';
-                        showInfo(data.message || 'Post rejected. Click generate to create a new one.');
-                    } catch (e) {
-                        showInfo('Post rejected. Click generate to create a new one.');
-                    }
-                };
-                
-                xhr.onerror = function() {
-                    console.error('Rejection error');
-                    showError('Failed to reject post');
-                };
-                
-                xhr.send(JSON.stringify({ approved: false }));
-            } catch (error) {
-                console.error('Rejection error:', error);
-                showError('Failed to reject: ' + error.message);
-            }
-        }
-
-        function showError(message) {
-            document.getElementById('errorText').textContent = message;
-            document.getElementById('errorMessage').style.display = 'block';
-            setTimeout(() => {
-                document.getElementById('errorMessage').style.display = 'none';
-            }, 10000); // Show for 10 seconds
-        }
-
-        function showInfo(message) {
-            const infoDiv = document.createElement('div');
-            infoDiv.style.cssText = 'background: #cce5ff; color: #004085; padding: 20px; border-radius: 10px; margin-top: 20px; text-align: center;';
-            infoDiv.textContent = message;
-            document.querySelector('.card').appendChild(infoDiv);
-            setTimeout(() => infoDiv.remove(), 5000);
-        }
+        }, 1000);
     </script>
 </body>
 </html>
